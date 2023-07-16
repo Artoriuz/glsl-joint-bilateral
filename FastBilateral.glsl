@@ -28,6 +28,14 @@
 //!WHEN CHROMA.w LUMA.w <
 //!DESC FastBilateral
 
+float comp_wi(float distance) {
+    if (distance < 0.1) {
+        return 1.0;
+    } else {
+        return 1e-8;
+    }
+}
+
 vec4 hook() {
     vec2 pp = CHROMA_pos * CHROMA_size - vec2(0.5);
     vec2 fp = floor(pp);
@@ -50,10 +58,10 @@ vec4 hook() {
     float wd21 = (1 - pp.y) * pp.x;
     float wd22 = pp.y * pp.x;
 
-    float wi11 = exp(-8.0 * abs(luma_00 - luma_11));
-    float wi12 = exp(-8.0 * abs(luma_00 - luma_12));
-    float wi21 = exp(-8.0 * abs(luma_00 - luma_21));
-    float wi22 = exp(-8.0 * abs(luma_00 - luma_22));
+    float wi11 = comp_wi(abs(luma_00 - luma_11));
+    float wi12 = comp_wi(abs(luma_00 - luma_12));
+    float wi21 = comp_wi(abs(luma_00 - luma_21));
+    float wi22 = comp_wi(abs(luma_00 - luma_22));
 
     float w11 = wd11 * wi11;
     float w12 = wd12 * wi12;
