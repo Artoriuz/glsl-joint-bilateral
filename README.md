@@ -6,6 +6,8 @@ The repo contains 2 distinct shaders:
 - `JointBilateral.glsl`: This is the "normal" version of the shader with tunable parameters and gaussian filters.
 - `FastBilateral.glsl`: This uses bilinear interpolation in the spatial plane instead, which makes it pretty damn fast.
 
+Both shaders are pretty much in alpha status, bugs and/or non-optimal parameters are to be expected.
+
 ## Instructions
 Add something like this to your mpv config:
 ```
