@@ -44,6 +44,16 @@
 //!OFFSET ALIGN
 //!DESC JointBilateral
 
+float comp_wi(float distance) {
+    if (distance < 0.1) {
+        return 1.0;
+    } else {
+        distance -= 0.1;
+        float d2 = distance * distance;
+        return exp(-intensity_coeff * d2);
+    }
+}
+
 vec4 hook() {
     vec2 pp = CHROMA_pos * CHROMA_size - vec2(0.5);
     vec2 fp = floor(pp);
@@ -60,7 +70,7 @@ vec4 hook() {
             float d2 = distance.x*distance.x + distance.y*distance.y;
             float distance_weight = exp(-distance_coeff * d2);
             float intensity_diff = abs(luma_pix - luma_centre);
-            float intensity_weight = exp(-intensity_coeff * (intensity_diff * intensity_diff));
+            float intensity_weight = comp_wi(intensity_diff);
             float final_weight = distance_weight * intensity_weight;
             accumulated_weight += final_weight;
             accumulated_colour += final_weight * chroma_pix;
