@@ -26,6 +26,7 @@
 //!WIDTH LUMA.w
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
+//!OFFSET ALIGN
 //!DESC FastBilateral
 
 float comp_wi(float distance) {

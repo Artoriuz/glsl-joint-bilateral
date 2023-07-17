@@ -41,6 +41,7 @@
 //!WIDTH LUMA.w
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
+//!OFFSET ALIGN
 //!DESC JointBilateral
 
 vec4 hook() {
