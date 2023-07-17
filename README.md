@@ -3,16 +3,18 @@
 ## Overview
 This is a simple implementation of joint bilateral chroma upsampling. It uses the luma plane as a guide to achieve sharper edges without introducing any ringing.
 The repo contains 2 distinct shaders:
-- `JointBilateral.glsl`: This is the ["classic" version](https://en.wikipedia.org/wiki/Bilateral_filter) of the shader with tunable parameters and gaussian filters. This shader hooks into the `NATIVE` stage, which means that it's applied after chroma is resampled by your `--cscale` of choice.
+- `JointBilateral.glsl`: This is the ["classic" version](https://en.wikipedia.org/wiki/Bilateral_filter) of the shader with tunable parameters and gaussian filters. This shader hooks into the `NATIVE` stage, which means that it's applied after chroma is resampled by your `--cscale` of choice. I personally really like it alongside `--cscale=sinc --cscale-radius=2`.
 - `FastBilateral.glsl`: This uses bilinear interpolation in the spatial plane and a much simpler pixel binning logic for intensity instead, which makes it pretty damn fast. This shader hooks into the `CHROMA` stage, so it'll replace your `--cscale`.
 
-Both shaders are pretty much in alpha status, bugs and/or non-optimal parameters are to be expected.
+Both shaders are pretty much in beta status, bugs and/or non-optimal parameters are to be expected.
 
 ## Instructions
 Add something like this to your mpv config:
 ```
 vo=gpu-next
-# For the classic version:
+# For the classic version, please note that you can change the filter to whatever you prefer:
+cscale=sinc
+cscale-radius=2
 glsl-shader="path/to/shader/JointBilateral.glsl"
 
 # For the simpler/faster version:
