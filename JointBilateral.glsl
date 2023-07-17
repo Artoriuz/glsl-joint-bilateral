@@ -23,26 +23,26 @@
 //!PARAM length
 //!TYPE int
 //!MINIMUM 1
-4
+9
 
 //!PARAM distance_coeff
 //!TYPE float
 //!MINIMUM 0.0
-4
+9
 
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
 128.0
 
-//!HOOK CHROMA
-//!BIND CHROMA
-//!BIND LUMA
-//!WIDTH LUMA.w
-//!HEIGHT LUMA.h
-//!WHEN CHROMA.w LUMA.w <
-//!OFFSET ALIGN
-//!DESC JointBilateral
+//!HOOK NATIVE
+//!BIND HOOKED
+//!DESC JointBilateral (Post-Scaler)
+
+float comp_wd(vec2 distance) {
+    float d2 = distance.x*distance.x + distance.y*distance.y;
+    return exp((-1.0 / distance_coeff) * d2);
+}
 
 float comp_wi(float distance) {
     if (distance < 0.1) {
@@ -55,22 +55,20 @@ float comp_wi(float distance) {
 }
 
 vec4 hook() {
-    vec2 pp = CHROMA_pos * CHROMA_size - vec2(0.5);
-    vec2 fp = floor(pp);
-    pp -= fp;
-
-    float luma_centre = LUMA_texOff(0).x;
+    float luma_centre = HOOKED_texOff(0).x;
     float accumulated_weight = 0.0;
     vec2 accumulated_colour = vec2(0.0);
     for (int y = -length + 1; y <= length; y++) {
         for (int x = -length + 1; x <= length; x++) {
-            vec2 chroma_pix = CHROMA_tex(vec2((fp + vec2(y, x) + vec2(0.5)) * CHROMA_pt)).xy;
-            float luma_pix = LUMA_tex(vec2((fp + vec2(y, x) + vec2(0.5)) * CHROMA_pt)).x;
-            vec2 distance = pp - vec2(y, x);
-            float d2 = distance.x*distance.x + distance.y*distance.y;
-            float distance_weight = exp(-distance_coeff * d2);
+            vec2 chroma_pix = HOOKED_texOff(vec2(y, x)).yz;
+            float luma_pix = HOOKED_texOff(vec2(y, x)).x;
+
+            vec2 distance = vec2(y, x);
+            float distance_weight = comp_wd(distance);
+            
             float intensity_diff = abs(luma_pix - luma_centre);
             float intensity_weight = comp_wi(intensity_diff);
+            
             float final_weight = distance_weight * intensity_weight;
             accumulated_weight += final_weight;
             accumulated_colour += final_weight * chroma_pix;
@@ -78,6 +76,7 @@ vec4 hook() {
         }
     
     vec4 output_pix = vec4(0.0, 0.0, 0.0, 1.0);
-    output_pix.xy = accumulated_colour / accumulated_weight;
+    output_pix.x = luma_centre;
+    output_pix.yz = accumulated_colour / accumulated_weight;
     return  output_pix;
 }
