@@ -24,3 +24,6 @@ You can set the following parameters:
 - `intensity_coeff`: Controls the shape of the Gaussian filter used for intensity-distance weighting. Higher values decrease the contribution of pixels with distant luminosities. Accepts floats higher than `0.0`, defaults to `64.0`.
 
 On `vo=gpu-next`, you can set these settings with `--glsl-shader-opts=param1=value1,param2=value2,...`.
+
+## Example
+![JointBilateral Example](./example.png "JointBilateral Example")
