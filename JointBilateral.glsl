@@ -69,11 +69,12 @@ vec4 hook() {
     int radius = length / 2;
     for (int y = -radius + 1; y <= radius; y++) {
         for (int x = -radius + 1; x <= radius; x++) {
-            vec2 chroma_pix = CHROMA_tex((fp + vec2(0.5) + vec2(y, x)) * CHROMA_pt).xy;
-            float luma_pix = LUMA_tex((fp + vec2(0.5) + vec2(y, x)) * CHROMA_pt).x;
+            vec2 cur_pos = (fp + vec2(0.5) + vec2(y, x)) * CHROMA_pt;
+            vec2 chroma_pix = CHROMA_tex(cur_pos).xy;
+            float luma_pix = LUMA_tex(cur_pos).x;
 
-            vec2 distance = pp - ((fp + vec2(0.5) + vec2(y, x)) * CHROMA_pt);
-            float distance_weight = comp_wd(distance);
+            vec2 pix_distance = vec2(distance(CHROMA_pos, (fp + vec2(y + 0.5, x + 0.5)) * CHROMA_pt));
+            float distance_weight = comp_wd(pix_distance);
             
             float intensity_diff = abs(luma_pix - luma_centre);
             float intensity_weight = comp_wi(intensity_diff);
@@ -81,9 +82,9 @@ vec4 hook() {
             float final_weight = distance_weight * intensity_weight;
             accumulated_weight += final_weight;
             accumulated_colour += final_weight * chroma_pix;
-            }
         }
-    
+    }
+
     vec4 output_pix = vec4(0.0, 0.0, 0.0, 1.0);
     output_pix.xy = accumulated_colour / accumulated_weight;
     return  output_pix;
