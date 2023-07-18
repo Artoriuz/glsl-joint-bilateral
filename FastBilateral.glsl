@@ -20,6 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+//!PARAM intensity_coeff
+//!TYPE float
+//!MINIMUM 0.0
+64.0
+
 //!HOOK CHROMA
 //!BIND CHROMA
 //!BIND LUMA
@@ -30,11 +35,7 @@
 //!DESC FastBilateral
 
 float comp_wi(float distance) {
-    if (distance < 0.1) {
-        return 1.0;
-    } else {
-        return 1e-8;
-    }
+    return exp(-intensity_coeff * distance * distance);
 }
 
 vec4 hook() {
@@ -43,7 +44,7 @@ vec4 hook() {
     pp -= fp;
 
     float luma_00 = LUMA_texOff(0).x;
-    
+
     vec2 chroma_11 = CHROMA_tex(vec2(fp + vec2(0.5)) * CHROMA_pt).xy;
     vec2 chroma_12 = CHROMA_tex(vec2(fp + vec2(0.5, 1.5)) * CHROMA_pt).xy;
     vec2 chroma_21 = CHROMA_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).xy;
