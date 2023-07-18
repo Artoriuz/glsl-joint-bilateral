@@ -50,12 +50,8 @@ float comp_wd(vec2 distance) {
 }
 
 float comp_wi(float distance) {
-    if (distance < 0.1) {
-        return 1.0;
-    } else {
-        distance -= 0.1;
-        return exp(-intensity_coeff * distance);
-    }
+    float d2 = distance * distance;
+    return exp(-intensity_coeff * d2);
 }
 
 vec4 hook() {
