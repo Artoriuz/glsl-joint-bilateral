@@ -47,6 +47,11 @@ float comp_wi(float distance) {
     return exp(-intensity_coeff * distance * distance);
 }
 
+float comp_w(float wd, float wi) {
+    float w = wd * wi;
+    return clamp(w, 1e-8, 1);
+}
+
 vec4 hook() {
     vec2 pp = CHROMA_pos * CHROMA_size - vec2(0.5);
     vec2 fp = floor(pp);
@@ -68,6 +73,42 @@ vec4 hook() {
     vec2 chroma_n = CHROMA_tex(vec2((fp + vec2(0.5, 2.5) ) * CHROMA_pt)).xy;
     vec2 chroma_o = CHROMA_tex(vec2((fp + vec2(1.5, 2.5) ) * CHROMA_pt)).xy;
     vec2 chroma_p = CHROMA_tex(vec2((fp + vec2(2.5, 2.5) ) * CHROMA_pt)).xy;
+
+    vec2 chroma_min = vec2(1e8);
+    chroma_min = min(chroma_min, chroma_a);
+    chroma_min = min(chroma_min, chroma_b);
+    chroma_min = min(chroma_min, chroma_c);
+    chroma_min = min(chroma_min, chroma_d);
+    chroma_min = min(chroma_min, chroma_e);
+    chroma_min = min(chroma_min, chroma_f);
+    chroma_min = min(chroma_min, chroma_g);
+    chroma_min = min(chroma_min, chroma_h);
+    chroma_min = min(chroma_min, chroma_i);
+    chroma_min = min(chroma_min, chroma_j);
+    chroma_min = min(chroma_min, chroma_k);
+    chroma_min = min(chroma_min, chroma_l);
+    chroma_min = min(chroma_min, chroma_m);
+    chroma_min = min(chroma_min, chroma_n);
+    chroma_min = min(chroma_min, chroma_o);
+    chroma_min = min(chroma_min, chroma_p);
+    
+    vec2 chroma_max = vec2(1e-8);
+    chroma_max = max(chroma_max, chroma_a);
+    chroma_max = max(chroma_max, chroma_b);
+    chroma_max = max(chroma_max, chroma_c);
+    chroma_max = max(chroma_max, chroma_d);
+    chroma_max = max(chroma_max, chroma_e);
+    chroma_max = max(chroma_max, chroma_f);
+    chroma_max = max(chroma_max, chroma_g);
+    chroma_max = max(chroma_max, chroma_h);
+    chroma_max = max(chroma_max, chroma_i);
+    chroma_max = max(chroma_max, chroma_j);
+    chroma_max = max(chroma_max, chroma_k);
+    chroma_max = max(chroma_max, chroma_l);
+    chroma_max = max(chroma_max, chroma_m);
+    chroma_max = max(chroma_max, chroma_n);
+    chroma_max = max(chroma_max, chroma_o);
+    chroma_max = max(chroma_max, chroma_p);
 
     float luma_0 = LUMA_texOff(0).x;
     float luma_a = LUMA_tex(vec2((fp + vec2(-1.5, -0.5)) * CHROMA_pt)).x;
@@ -121,24 +162,24 @@ vec4 hook() {
     float wi_o = comp_wi(luma_0 - luma_o);
     float wi_p = comp_wi(luma_0 - luma_p);
 
-    float w_a = wd_a * wi_a;
-    float w_b = wd_b * wi_b;
-    float w_c = wd_c * wi_c;
-    float w_d = wd_d * wi_d;
-    float w_e = wd_e * wi_e;
-    float w_f = wd_f * wi_f;
-    float w_g = wd_g * wi_g;
-    float w_h = wd_h * wi_h;
-    float w_i = wd_i * wi_i;
-    float w_j = wd_j * wi_j;
-    float w_k = wd_k * wi_k;
-    float w_l = wd_l * wi_l;
-    float w_m = wd_m * wi_m;
-    float w_n = wd_n * wi_n;
-    float w_o = wd_o * wi_o;
-    float w_p = wd_p * wi_p;
+    float w_a = comp_w(wd_a, wi_a);
+    float w_b = comp_w(wd_b, wi_b);
+    float w_c = comp_w(wd_c, wi_c);
+    float w_d = comp_w(wd_d, wi_d);
+    float w_e = comp_w(wd_e, wi_e);
+    float w_f = comp_w(wd_f, wi_f);
+    float w_g = comp_w(wd_g, wi_g);
+    float w_h = comp_w(wd_h, wi_h);
+    float w_i = comp_w(wd_i, wi_i);
+    float w_j = comp_w(wd_j, wi_j);
+    float w_k = comp_w(wd_k, wi_k);
+    float w_l = comp_w(wd_l, wi_l);
+    float w_m = comp_w(wd_m, wi_m);
+    float w_n = comp_w(wd_n, wi_n);
+    float w_o = comp_w(wd_o, wi_o);
+    float w_p = comp_w(wd_p, wi_p);
 
-    float wt = 0.0;
+    float wt = 0;
     wt += w_a;
     wt += w_b;
     wt += w_c;
@@ -154,7 +195,7 @@ vec4 hook() {
     wt += w_n;
     wt += w_o;
 
-    vec2 ct = vec2(0.0);
+    vec2 ct = vec2(0);
     ct += w_a * chroma_a;
     ct += w_b * chroma_b;
     ct += w_c * chroma_c;
@@ -174,5 +215,6 @@ vec4 hook() {
 
     vec4 output_pix = vec4(0.0, 0.0, 0.0, 1.0);
     output_pix.xy = ct / wt;
+    output_pix.xy = clamp(output_pix.xy, chroma_min, chroma_max);
     return  output_pix;
 }
