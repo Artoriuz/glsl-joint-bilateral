@@ -192,8 +192,10 @@ vec4 hook() {
     wt += w_j;
     wt += w_k;
     wt += w_l;
+    wt += w_m;
     wt += w_n;
     wt += w_o;
+    wt += w_p;
 
     vec2 ct = vec2(0);
     ct += w_a * chroma_a;
