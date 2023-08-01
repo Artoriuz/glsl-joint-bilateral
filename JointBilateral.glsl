@@ -37,7 +37,7 @@
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
 //!OFFSET ALIGN
-//!DESC JointBilateral
+//!DESC Joint Bilateral
 
 float comp_wd(vec2 distance) {
     return exp(-distance_coeff * (distance.x * distance.x + distance.y * distance.y));
@@ -57,7 +57,7 @@ vec4 hook() {
     vec2 fp = floor(pp);
     pp -= fp;
 
-    vec2 chroma_a = CHROMA_tex(vec2((fp + vec2(-1.5, -0.5)) * CHROMA_pt)).xy;
+    vec2 chroma_a = CHROMA_tex(vec2((fp + vec2(-0.5, -0.5)) * CHROMA_pt)).xy;
     vec2 chroma_b = CHROMA_tex(vec2((fp + vec2(0.5, -0.5)) * CHROMA_pt)).xy;
     vec2 chroma_c = CHROMA_tex(vec2((fp + vec2(1.5, -0.5)) * CHROMA_pt)).xy;
     vec2 chroma_d = CHROMA_tex(vec2((fp + vec2(2.5, -0.5)) * CHROMA_pt)).xy;
@@ -88,7 +88,7 @@ vec4 hook() {
 
 
     float luma_0 = LUMA_texOff(0.0).x;
-    float luma_a = LUMA_tex(vec2((fp + vec2(-1.5, -0.5)) * CHROMA_pt)).x;
+    float luma_a = LUMA_tex(vec2((fp + vec2(-0.5, -0.5)) * CHROMA_pt)).x;
     float luma_b = LUMA_tex(vec2((fp + vec2(0.5, -0.5)) * CHROMA_pt)).x;
     float luma_c = LUMA_tex(vec2((fp + vec2(1.5, -0.5)) * CHROMA_pt)).x;
     float luma_d = LUMA_tex(vec2((fp + vec2(2.5, -0.5)) * CHROMA_pt)).x;
