@@ -23,7 +23,7 @@
 //!PARAM distance_coeff
 //!TYPE float
 //!MINIMUM 0.0
-2.0
+2.5
 
 //!PARAM intensity_coeff
 //!TYPE float
