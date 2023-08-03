@@ -23,12 +23,12 @@
 //!PARAM distance_coeff
 //!TYPE float
 //!MINIMUM 0.0
-2.5
+2.0
 
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
-128.0
+64.0
 
 //!HOOK CHROMA
 //!BIND CHROMA
