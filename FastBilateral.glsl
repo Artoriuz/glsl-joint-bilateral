@@ -27,7 +27,7 @@
 //!SAVE LUMA_LOWRES
 //!WIDTH CHROMA.w
 //!HEIGHT CHROMA.h
-//!DESC Joint Bilateral (Downscaling Luma)
+//!DESC Fast Bilateral (Downscaling Luma)
 
 vec4 hook() {
     vec2 pp = LUMA_pos * LUMA_size - vec2(0.5);
@@ -57,7 +57,7 @@ vec4 hook() {
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
 //!OFFSET ALIGN
-//!DESC Fast Bilateral
+//!DESC Fast Bilateral (Upscaling Chroma)
 
 float comp_wi(float distance) {
     return exp(-intensity_coeff * distance * distance);
