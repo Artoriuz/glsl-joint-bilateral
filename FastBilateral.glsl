@@ -20,6 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+//!HOOK CHROMA
+//!BIND CHROMA
+//!BIND LUMA
+//!WHEN CHROMA.w LUMA.w <
+//!SAVE LUMA_LOWRES
+//!WIDTH CHROMA.w
+//!HEIGHT CHROMA.h
+//!DESC Joint Bilateral (Downscaling Luma)
+
+vec4 hook() {
+    vec2 pp = LUMA_pos * LUMA_size - vec2(0.5);
+    vec2 fp = floor(pp);
+
+    float luma_pixels[4];
+    luma_pixels[0] = linearize(LUMA_tex(vec2(fp + vec2(0.5)) * LUMA_pt)).x;
+    luma_pixels[1] = linearize(LUMA_tex(vec2(fp + vec2(0.5, 1.5)) * LUMA_pt)).x;
+    luma_pixels[2] = linearize(LUMA_tex(vec2(fp + vec2(1.5, 0.5)) * LUMA_pt)).x;
+    luma_pixels[3] = linearize(LUMA_tex(vec2(fp + vec2(1.5, 1.5)) * LUMA_pt)).x;
+
+    float output_luma = (luma_pixels[0] + luma_pixels[1] + luma_pixels[2] + luma_pixels[3]) / 4.0;
+    vec4 output_pix = delinearize(vec4(output_luma, 0.0, 0.0, 1.0));
+    return output_pix;
+}
+
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
@@ -28,6 +52,7 @@
 //!HOOK CHROMA
 //!BIND CHROMA
 //!BIND LUMA
+//!BIND LUMA_LOWRES
 //!WIDTH LUMA.w
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
@@ -50,10 +75,10 @@ vec4 hook() {
     vec2 chroma_21 = CHROMA_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).xy;
     vec2 chroma_22 = CHROMA_tex(vec2(fp + vec2(1.5, 1.5)) * CHROMA_pt).xy;
 
-    float luma_11 = LUMA_tex(vec2(fp + vec2(0.5)) * CHROMA_pt).x;
-    float luma_12 = LUMA_tex(vec2(fp + vec2(0.5, 1.5)) * CHROMA_pt).x;
-    float luma_21 = LUMA_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).x;
-    float luma_22 = LUMA_tex(vec2(fp + vec2(1.5, 1.5)) * CHROMA_pt).x;
+    float luma_11 = LUMA_LOWRES_tex(vec2(fp + vec2(0.5)) * CHROMA_pt).x;
+    float luma_12 = LUMA_LOWRES_tex(vec2(fp + vec2(0.5, 1.5)) * CHROMA_pt).x;
+    float luma_21 = LUMA_LOWRES_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).x;
+    float luma_22 = LUMA_LOWRES_tex(vec2(fp + vec2(1.5, 1.5)) * CHROMA_pt).x;
 
     float wd11 = (1 - pp.y) * (1 - pp.x);
     float wd12 = pp.y * (1 - pp.x);
