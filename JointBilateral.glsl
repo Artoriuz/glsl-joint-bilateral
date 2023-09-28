@@ -47,12 +47,12 @@ vec4 hook() {
 //!PARAM distance_coeff
 //!TYPE float
 //!MINIMUM 0.0
-3.0
+4.0
 
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
-128.0
+256.0
 
 //!HOOK CHROMA
 //!BIND CHROMA
