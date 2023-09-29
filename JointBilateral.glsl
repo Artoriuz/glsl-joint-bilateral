@@ -21,26 +21,35 @@
 // SOFTWARE.
 
 //!HOOK CHROMA
-//!BIND CHROMA
 //!BIND LUMA
-//!WHEN CHROMA.w LUMA.w <
+//!BIND HOOKED
 //!SAVE LUMA_LOWRES
-//!WIDTH CHROMA.w
-//!HEIGHT CHROMA.h
+//!WHEN CHROMA.w LUMA.w <
 //!DESC Joint Bilateral (Downscaling Luma)
 
 vec4 hook() {
-    vec2 pp = LUMA_pos * LUMA_size - vec2(0.5);
-    vec2 fp = floor(pp);
+    vec2 start  = ceil((LUMA_pos - CHROMA_pt) * LUMA_size - 0.5);
+    vec2 end = floor((LUMA_pos + CHROMA_pt) * LUMA_size - 0.5);
 
-    float luma_pixels[4];
-    luma_pixels[0] = linearize(LUMA_tex(vec2(fp + vec2(0.5)) * LUMA_pt)).x;
-    luma_pixels[1] = linearize(LUMA_tex(vec2(fp + vec2(0.5, 1.5)) * LUMA_pt)).x;
-    luma_pixels[2] = linearize(LUMA_tex(vec2(fp + vec2(1.5, 0.5)) * LUMA_pt)).x;
-    luma_pixels[3] = linearize(LUMA_tex(vec2(fp + vec2(1.5, 1.5)) * LUMA_pt)).x;
+    float luma_pix = 0.0;
+    float w = 0.0;
+    float d = 0.0;
+    float wt = 0.0;
+    float val = 0.0;
+    vec2 pos = LUMA_pos;
 
-    float output_luma = (luma_pixels[0] + luma_pixels[1] + luma_pixels[2] + luma_pixels[3]) / 4.0;
-    vec4 output_pix = delinearize(vec4(output_luma, 0.0, 0.0, 1.0));
+    for (float dx = start.x; dx <= end.x; dx++) {
+        for (float dy = start.y; dy <= end.y; dy++) {
+            pos = LUMA_pt * vec2(dx + 0.5, dy + 0.5);
+            d = length((pos - LUMA_pos) * CHROMA_size);
+            w = exp(-2.0 * pow(d, 2.0));
+            luma_pix = LUMA_tex(pos).x;
+            val += w * luma_pix;
+            wt += w;
+        }
+    }
+
+    vec4 output_pix = vec4(val / wt, 0.0, 0.0, 1.0);
     return output_pix;
 }
 
