@@ -5,7 +5,8 @@ This is a simple implementation of joint bilateral chroma upsampling. It uses th
 
 The repo contains 2 distinct shaders:
 - `JointBilateral.glsl`: This is the ["classic version"](https://en.wikipedia.org/wiki/Bilateral_filter) of the shader with gaussian functions.
-- `FastBilateral.glsl`: This uses bilinear interpolation in the spatial plane, which makes it pretty fast.
+- `MemeBilateral.glsl`: Attempts to fix the main shortcomings of JointBilateral by combining it with some logic from CfL. This uses the coefficient of determination to mix the output of the bilateral filter with the output of a (very) sharp spatial filter.
+- `FastBilateral.glsl`: This is a simplified version of the shader.
 
 ## Instructions
 Add something like this to your mpv config:
@@ -20,8 +21,8 @@ gpu-next is required due to the usage of tunable parameters.
 
 ## Parameters
 You can set the following parameters:
-- `distance_coeff`: Controls the shape of the spatial Gaussian filter. Higher values decrease the contribution of pixels more distant to the centre. Accepts floats higher than `0.0`, defaults to `4.0`.
-- `intensity_coeff`: Controls the shape of the Gaussian filter used for intensity-distance weighting. Higher values decrease the contribution of pixels with distant luminosities. Accepts floats higher than `0.0`, defaults to `256.0`.
+- `distance_coeff`: Controls the shape of the spatial Gaussian filter. Higher values decrease the contribution of pixels more distant to the centre.
+- `intensity_coeff`: Controls the shape of the Gaussian filter used for intensity-distance weighting. Higher values decrease the contribution of pixels with distant luminosities.
 
 On `vo=gpu-next`, you can set these settings with `--glsl-shader-opts=param1=value1,param2=value2,...`.
 
