@@ -5,17 +5,14 @@ This is a simple implementation of joint bilateral chroma upsampling. It uses th
 
 The repo contains 2 distinct shaders:
 - `JointBilateral.glsl`: This is the ["classic version"](https://en.wikipedia.org/wiki/Bilateral_filter) of the shader with gaussian functions.
-- `MemeBilateral.glsl`: Attempts to fix the main shortcomings of JointBilateral by combining it with some logic from CfL. This uses the coefficient of determination to mix the output of the bilateral filter with the output of a (very) sharp spatial filter.
+- `MemeBilateral.glsl`: Attempts to fix the main shortcomings of JointBilateral by combining it with some logic from CfL. This uses the coefficient of determination to mix the output of the bilateral filter with the output of a (very) sharp spatial filter. If you really want to use one of these shaders you should probably use this one.
 - `FastBilateral.glsl`: This is a simplified version of the shader.
 
 ## Instructions
 Add something like this to your mpv config:
 ```
 vo=gpu-next
-# For the classic version:
 glsl-shader="path/to/shader/JointBilateral.glsl"
-# For the simpler/faster version:
-glsl-shader="path/to/shader/FastBilateral.glsl"
 ```
 gpu-next is required due to the usage of tunable parameters.
 
