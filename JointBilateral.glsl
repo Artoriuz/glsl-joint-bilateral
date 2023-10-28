@@ -21,47 +21,62 @@
 // SOFTWARE.
 
 //!HOOK CHROMA
-//!BIND LUMA
 //!BIND HOOKED
+//!BIND LUMA
 //!SAVE LUMA_LOWRES
+//!WIDTH CHROMA.w
+//!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
-//!DESC Joint Bilateral (Downscaling Luma)
+//!DESC Joint Bilateral (Downscaling Luma 1st Step)
 
 vec4 hook() {
-    vec2 start  = ceil((LUMA_pos - CHROMA_pt) * LUMA_size - 0.5);
-    vec2 end = floor((LUMA_pos + CHROMA_pt) * LUMA_size - 0.5);
+    float factor = ceil(LUMA_size.x / HOOKED_size.x);
+    int start = int(ceil(-factor / 2.0 - 0.5));
+    int end = int(floor(factor / 2.0 - 0.5));
 
-    float luma_pix = 0.0;
-    float w = 0.0;
-    float d = 0.0;
-    float wt = 0.0;
-    float val = 0.0;
-    vec2 pos = LUMA_pos;
-
-    for (float dx = start.x; dx <= end.x; dx++) {
-        for (float dy = start.y; dy <= end.y; dy++) {
-            pos = LUMA_pt * vec2(dx + 0.5, dy + 0.5);
-            d = length((pos - LUMA_pos) * CHROMA_size);
-            w = exp(-2.0 * pow(d, 2.0));
-            luma_pix = LUMA_tex(pos).x;
-            val += w * luma_pix;
-            wt += w;
-        }
+    float output_luma = 0.0;
+    int wt = 0;
+    for (int dx = start; dx <= end; dx++) {
+        output_luma += LUMA_texOff(vec2(dx + 0.5, 0.0)).x;
+        wt++;
     }
+    vec4 output_pix = vec4(output_luma / float(wt), 0.0, 0.0, 1.0);
+    return output_pix;
+}
 
-    vec4 output_pix = vec4(val / wt, 0.0, 0.0, 1.0);
+//!HOOK CHROMA
+//!BIND HOOKED
+//!BIND LUMA_LOWRES
+//!SAVE LUMA_LOWRES
+//!WIDTH CHROMA.w
+//!HEIGHT CHROMA.h
+//!WHEN CHROMA.w LUMA.w <
+//!DESC Joint Bilateral (Downscaling Luma 2nd Step)
+
+vec4 hook() {
+    float factor = ceil(LUMA_LOWRES_size.y / HOOKED_size.y);
+    int start = int(ceil(-factor / 2.0 - 0.5));
+    int end = int(floor(factor / 2.0 - 0.5));
+
+    float output_luma = 0.0;
+    int wt = 0;
+    for (int dy = start; dy <= end; dy++) {
+        output_luma += LUMA_LOWRES_texOff(vec2(0.0, dy + 0.5)).x;
+        wt++;
+    }
+    vec4 output_pix = vec4(output_luma / float(wt), 0.0, 0.0, 1.0);
     return output_pix;
 }
 
 //!PARAM distance_coeff
 //!TYPE float
 //!MINIMUM 0.0
-4.0
+2.5
 
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
-256.0
+512.0
 
 //!HOOK CHROMA
 //!BIND CHROMA

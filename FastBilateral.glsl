@@ -20,14 +20,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+//!HOOK CHROMA
+//!BIND HOOKED
+//!BIND LUMA
+//!SAVE LUMA_LOWRES
+//!WIDTH CHROMA.w
+//!HEIGHT LUMA.h
+//!WHEN CHROMA.w LUMA.w <
+//!DESC Fast Bilateral (Downscaling Luma 1st Step)
+
+vec4 hook() {
+    float factor = ceil(LUMA_size.x / HOOKED_size.x);
+    int start = int(ceil(-factor / 2.0 - 0.5));
+    int end = int(floor(factor / 2.0 - 0.5));
+
+    float output_luma = 0.0;
+    int wt = 0;
+    for (int dx = start; dx <= end; dx++) {
+        output_luma += LUMA_texOff(vec2(dx + 0.5, 0.0)).x;
+        wt++;
+    }
+    vec4 output_pix = vec4(output_luma / float(wt), 0.0, 0.0, 1.0);
+    return output_pix;
+}
+
+//!HOOK CHROMA
+//!BIND HOOKED
+//!BIND LUMA_LOWRES
+//!SAVE LUMA_LOWRES
+//!WIDTH CHROMA.w
+//!HEIGHT CHROMA.h
+//!WHEN CHROMA.w LUMA.w <
+//!DESC Fast Bilateral (Downscaling Luma 2nd Step)
+
+vec4 hook() {
+    float factor = ceil(LUMA_LOWRES_size.y / HOOKED_size.y);
+    int start = int(ceil(-factor / 2.0 - 0.5));
+    int end = int(floor(factor / 2.0 - 0.5));
+
+    float output_luma = 0.0;
+    int wt = 0;
+    for (int dy = start; dy <= end; dy++) {
+        output_luma += LUMA_LOWRES_texOff(vec2(0.0, dy + 0.5)).x;
+        wt++;
+    }
+    vec4 output_pix = vec4(output_luma / float(wt), 0.0, 0.0, 1.0);
+    return output_pix;
+}
+
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
-256.0
+512.0
 
 //!HOOK CHROMA
 //!BIND CHROMA
 //!BIND LUMA
+//!BIND LUMA_LOWRES
 //!WIDTH LUMA.w
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
@@ -50,10 +99,10 @@ vec4 hook() {
     vec2 chroma_21 = CHROMA_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).xy;
     vec2 chroma_22 = CHROMA_tex(vec2(fp + vec2(1.5, 1.5)) * CHROMA_pt).xy;
 
-    float luma_11 = LUMA_tex(vec2(fp + vec2(0.5)) * CHROMA_pt).x;
-    float luma_12 = LUMA_tex(vec2(fp + vec2(0.5, 1.5)) * CHROMA_pt).x;
-    float luma_21 = LUMA_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).x;
-    float luma_22 = LUMA_tex(vec2(fp + vec2(1.5, 1.5)) * CHROMA_pt).x;
+    float luma_11 = LUMA_LOWRES_tex(vec2(fp + vec2(0.5)) * CHROMA_pt).x;
+    float luma_12 = LUMA_LOWRES_tex(vec2(fp + vec2(0.5, 1.5)) * CHROMA_pt).x;
+    float luma_21 = LUMA_LOWRES_tex(vec2(fp + vec2(1.5, 0.5)) * CHROMA_pt).x;
+    float luma_22 = LUMA_LOWRES_tex(vec2(fp + vec2(1.5, 1.5)) * CHROMA_pt).x;
 
     float wd11 = (1 - pp.y) * (1 - pp.x);
     float wd12 = pp.y * (1 - pp.x);
