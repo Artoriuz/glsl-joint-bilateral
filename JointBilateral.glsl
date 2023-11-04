@@ -105,7 +105,7 @@ float comp_wi(float distance) {
 
 vec4 hook() {
 #if (USE_SHARP_SPATIAL_FILTER == 1)
-    float ar_strength = 0.5;
+    float ar_strength = 0.75;
     float division_limit = 1e-4;
 #endif
     float luma_zero = LUMA_texOff(0.0).x;
