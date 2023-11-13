@@ -88,12 +88,8 @@ vec4 hook() {
 //!OFFSET ALIGN
 //!DESC Joint Bilateral (Upscaling Chroma)
 
-float comp_wd(vec2 distance) {
-    return exp(-distance_coeff * pow(length(distance), 2.0));
-}
-
-float comp_wi(float distance) {
-    return exp(-intensity_coeff * pow(distance, 2.0));
+float comp_w(vec2 spatial_distance, float intensity_distance) {
+    return exp(-distance_coeff * pow(length(spatial_distance), 2.0) - intensity_coeff * pow(intensity_distance, 2.0));
 }
 
 vec4 hook() {
@@ -132,42 +128,27 @@ vec4 hook() {
     luma_pixels[10] = LUMA_LOWRES_tex(vec2((fp + vec2( 0.5, 2.5)) * HOOKED_pt)).x;
     luma_pixels[11] = LUMA_LOWRES_tex(vec2((fp + vec2( 1.5, 2.5)) * HOOKED_pt)).x;
 
-    float wd[12];
-    wd[0]  = comp_wd(vec2( 0.0,-1.0) - pp);
-    wd[1]  = comp_wd(vec2( 1.0,-1.0) - pp);
-    wd[2]  = comp_wd(vec2(-1.0, 0.0) - pp);
-    wd[3]  = comp_wd(vec2( 0.0, 0.0) - pp);
-    wd[4]  = comp_wd(vec2( 1.0, 0.0) - pp);
-    wd[5]  = comp_wd(vec2( 2.0, 0.0) - pp);
-    wd[6]  = comp_wd(vec2(-1.0, 1.0) - pp);
-    wd[7]  = comp_wd(vec2( 0.0, 1.0) - pp);
-    wd[8]  = comp_wd(vec2( 1.0, 1.0) - pp);
-    wd[9]  = comp_wd(vec2( 2.0, 1.0) - pp);
-    wd[10] = comp_wd(vec2( 0.0, 2.0) - pp);
-    wd[11] = comp_wd(vec2( 1.0, 2.0) - pp);
-
-    float wi[12];
-    for (int i = 0; i < 12; i++) {
-        wi[i] = comp_wi(luma_zero - luma_pixels[i]);
-    }
-
     float w[12];
+    w[0]  = comp_w(vec2( 0.0,-1.0) - pp, luma_zero - luma_pixels[0] );
+    w[1]  = comp_w(vec2( 1.0,-1.0) - pp, luma_zero - luma_pixels[1] );
+    w[2]  = comp_w(vec2(-1.0, 0.0) - pp, luma_zero - luma_pixels[2] );
+    w[3]  = comp_w(vec2( 0.0, 0.0) - pp, luma_zero - luma_pixels[3] );
+    w[4]  = comp_w(vec2( 1.0, 0.0) - pp, luma_zero - luma_pixels[4] );
+    w[5]  = comp_w(vec2( 2.0, 0.0) - pp, luma_zero - luma_pixels[5] );
+    w[6]  = comp_w(vec2(-1.0, 1.0) - pp, luma_zero - luma_pixels[6] );
+    w[7]  = comp_w(vec2( 0.0, 1.0) - pp, luma_zero - luma_pixels[7] );
+    w[8]  = comp_w(vec2( 1.0, 1.0) - pp, luma_zero - luma_pixels[8] );
+    w[9]  = comp_w(vec2( 2.0, 1.0) - pp, luma_zero - luma_pixels[9] );
+    w[10] = comp_w(vec2( 0.0, 2.0) - pp, luma_zero - luma_pixels[10]);
+    w[11] = comp_w(vec2( 1.0, 2.0) - pp, luma_zero - luma_pixels[11]);
+
+    float wt = 0.0;
+    vec2 ct = vec2(0.0);
     for (int i = 0; i < 12; i++) {
-        w[i] = wd[i] * wi[i];
+        wt += w[i];
+        ct += w[i] * chroma_pixels[i];
     }
 
-    float wt2 = 0.0;
-    for (int i = 0; i < 12; i++) {
-        wt2 += w[i];
-    }
-
-    vec2 ct2 = vec2(0.0);
-    for (int i = 0; i < 12; i++) {
-        ct2 += w[i] * chroma_pixels[i];
-    }
-
-    vec2 chroma_bilat = clamp(ct2 / wt2, 0.0, 1.0);
-
-    output_pix.xy = chroma_bilat;
+    output_pix.xy = clamp(ct / wt, 0.0, 1.0);
     return output_pix;
 }
