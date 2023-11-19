@@ -28,7 +28,7 @@
 //!PARAM intensity_coeff
 //!TYPE float
 //!MINIMUM 0.0
-512.0
+256.0
 
 //!HOOK CHROMA
 //!BIND LUMA
@@ -40,7 +40,7 @@
 //!DESC Joint Bilateral (Upscaling Chroma)
 
 float comp_w(vec2 spatial_distance, float intensity_distance) {
-    return exp(-distance_coeff * pow(length(spatial_distance), 2.0) - intensity_coeff * pow(intensity_distance, 2.0));
+    return max(exp(-distance_coeff * pow(length(spatial_distance), 2.0) - intensity_coeff * pow(intensity_distance, 2.0)), 1e-32);
 }
 
 vec4 hook() {
