@@ -37,7 +37,7 @@
 //!HEIGHT LUMA.h
 //!WHEN CHROMA.w LUMA.w <
 //!OFFSET ALIGN
-//!DESC Joint Bilateral (Upscaling Chroma)
+//!DESC Fast Bilateral (Upscaling Chroma)
 
 float comp_w(vec2 spatial_distance, float intensity_distance) {
     return max(exp(-distance_coeff * pow(length(spatial_distance), 2.0) - intensity_coeff * pow(intensity_distance, 2.0)), 1e-32);
