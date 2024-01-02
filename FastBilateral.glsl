@@ -20,6 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+//!HOOK CHROMA
+//!BIND LUMA
+//!BIND HOOKED
+//!SAVE LUMA_LOWRES
+//!WIDTH CHROMA.w
+//!HEIGHT CHROMA.h
+//!WHEN CHROMA.w LUMA.w <
+//!DESC Fast Bilateral (Downscaling Luma)
+
+vec4 hook() {
+    return LUMA_texOff(0.0);
+}
+
 //!PARAM distance_coeff
 //!TYPE float
 //!MINIMUM 0.0
@@ -32,6 +45,7 @@
 
 //!HOOK CHROMA
 //!BIND LUMA
+//!BIND LUMA_LOWRES
 //!BIND HOOKED
 //!WIDTH LUMA.w
 //!HEIGHT LUMA.h
@@ -59,10 +73,10 @@ vec4 hook() {
 
 
     float luma_pixels[4];
-    luma_pixels[0]  = LUMA_tex(vec2((fp + vec2( 0.5, 0.5)) * HOOKED_pt)).x;
-    luma_pixels[1]  = LUMA_tex(vec2((fp + vec2( 1.5, 0.5)) * HOOKED_pt)).x;
-    luma_pixels[2]  = LUMA_tex(vec2((fp + vec2( 0.5, 1.5)) * HOOKED_pt)).x;
-    luma_pixels[3]  = LUMA_tex(vec2((fp + vec2( 1.5, 1.5)) * HOOKED_pt)).x;
+    luma_pixels[0]  = LUMA_LOWRES_tex(vec2((fp + vec2( 0.5, 0.5)) * HOOKED_pt)).x;
+    luma_pixels[1]  = LUMA_LOWRES_tex(vec2((fp + vec2( 1.5, 0.5)) * HOOKED_pt)).x;
+    luma_pixels[2]  = LUMA_LOWRES_tex(vec2((fp + vec2( 0.5, 1.5)) * HOOKED_pt)).x;
+    luma_pixels[3]  = LUMA_LOWRES_tex(vec2((fp + vec2( 1.5, 1.5)) * HOOKED_pt)).x;
 
     float w[4];
     w[0]  = comp_w(vec2( 0.0, 0.0) - pp, luma_zero - luma_pixels[0] );
