@@ -22,5 +22,7 @@ You can set the following parameters:
 
 On `vo=gpu-next`, you can set these settings with `--glsl-shader-opts=param1=value1,param2=value2,...`.
 
+The shaders have very aggressive defaults, which may not work well on all content. If you find the output too harsh, try reducing the coefficients.
+
 ## Example
 ![JointBilateral Example](./example.png "JointBilateral Example")
