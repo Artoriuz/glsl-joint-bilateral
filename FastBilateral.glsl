@@ -20,6 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+//!PARAM chroma_offset_x
+//!TYPE float
+0.0
+
+//!PARAM chroma_offset_y
+//!TYPE float
+0.0
+
 //!HOOK CHROMA
 //!BIND LUMA
 //!BIND HOOKED
@@ -30,7 +38,7 @@
 //!DESC Fast Bilateral (Downscaling Luma)
 
 vec4 hook() {
-    return LUMA_texOff(vec2(-0.5, 0.0));
+    return LUMA_texOff(vec2(chroma_offset_x, chroma_offset_y));
 }
 
 //!PARAM distance_coeff
