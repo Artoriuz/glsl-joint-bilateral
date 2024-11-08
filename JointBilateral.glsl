@@ -30,15 +30,77 @@
 
 //!HOOK CHROMA
 //!BIND LUMA
-//!BIND HOOKED
-//!SAVE LUMA_LOWRES
+//!BIND CHROMA
+//!SAVE LUMA_LR
+//!WIDTH CHROMA.w
+//!HEIGHT LUMA.h
+//!WHEN CHROMA.w LUMA.w <
+//!DESC Joint Bilateral (Hermite 1st step, Downscaling Luma)
+
+float comp_wd(vec2 v) {
+    float x = min(length(v), 1.0);
+    return smoothstep(0.0, 1.0, 1.0 - x);
+}
+
+vec4 hook() {
+    vec2 luma_pos = LUMA_pos;
+    luma_pos.x += chroma_offset_x / LUMA_size.x;
+    float start  = ceil((luma_pos.x - (1.0 / CHROMA_size.x)) * LUMA_size.x - 0.5);
+    float end = floor((luma_pos.x + (1.0 / CHROMA_size.x)) * LUMA_size.x - 0.5);
+
+    float wt = 0.0;
+    float luma_sum = 0.0;
+    vec2 pos = luma_pos;
+
+    for (float dx = start.x; dx <= end.x; dx++) {
+        pos.x = LUMA_pt.x * (dx + 0.5);
+        vec2 dist = (pos - luma_pos) * CHROMA_size;
+        float wd = comp_wd(dist);
+        float luma_pix = LUMA_tex(pos).x;
+        luma_sum += wd * luma_pix;
+        wt += wd;
+    }
+
+    vec4 output_pix = vec4(luma_sum /= wt, 0.0, 0.0, 1.0);
+    return clamp(output_pix, 0.0, 1.0);
+}
+
+//!HOOK CHROMA
+//!BIND LUMA_LR
+//!BIND CHROMA
+//!BIND LUMA
+//!SAVE LUMA_LR
 //!WIDTH CHROMA.w
 //!HEIGHT CHROMA.h
 //!WHEN CHROMA.w LUMA.w <
-//!DESC Joint Bilateral (Downscaling Luma)
+//!DESC Joint Bilateral (Hermite 2nd step, Downscaling Luma)
+
+float comp_wd(vec2 v) {
+    float x = min(length(v), 1.0);
+    return smoothstep(0.0, 1.0, 1.0 - x);
+}
 
 vec4 hook() {
-    return LUMA_texOff(vec2(chroma_offset_x, chroma_offset_y));
+    vec2 luma_pos = LUMA_LR_pos;
+    luma_pos.y += chroma_offset_y / LUMA_LR_size.y;
+    float start  = ceil((luma_pos.y - (1.0 / CHROMA_size.y)) * LUMA_LR_size.y - 0.5);
+    float end = floor((luma_pos.y + (1.0 / CHROMA_size.y)) * LUMA_LR_size.y - 0.5);
+
+    float wt = 0.0;
+    float luma_sum = 0.0;
+    vec2 pos = luma_pos;
+
+    for (float dy = start; dy <= end; dy++) {
+        pos.y = LUMA_LR_pt.y * (dy + 0.5);
+        vec2 dist = (pos - luma_pos) * CHROMA_size;
+        float wd = comp_wd(dist);
+        float luma_pix = LUMA_LR_tex(pos).x;
+        luma_sum += wd * luma_pix;
+        wt += wd;
+    }
+
+    vec4 output_pix = vec4(luma_sum /= wt, 0.0, 0.0, 1.0);
+    return clamp(output_pix, 0.0, 1.0);
 }
 
 //!PARAM distance_coeff
@@ -53,7 +115,7 @@ vec4 hook() {
 
 //!HOOK CHROMA
 //!BIND LUMA
-//!BIND LUMA_LOWRES
+//!BIND LUMA_LR
 //!BIND HOOKED
 //!WIDTH LUMA.w
 //!HEIGHT LUMA.h
@@ -99,10 +161,10 @@ vec4 hook() {
     chroma_pixels[11] = vec2(chroma_quads[3][0].x, chroma_quads[3][1].x);
 
     vec4 luma_quads[4];
-    luma_quads[0] = LUMA_LOWRES_gather(vec2((fp + vec2(0.0, 0.0)) * HOOKED_pt), 0);
-    luma_quads[1] = LUMA_LOWRES_gather(vec2((fp + vec2(2.0, 0.0)) * HOOKED_pt), 0);
-    luma_quads[2] = LUMA_LOWRES_gather(vec2((fp + vec2(0.0, 2.0)) * HOOKED_pt), 0);
-    luma_quads[3] = LUMA_LOWRES_gather(vec2((fp + vec2(2.0, 2.0)) * HOOKED_pt), 0);
+    luma_quads[0] = LUMA_LR_gather(vec2((fp + vec2(0.0, 0.0)) * HOOKED_pt), 0);
+    luma_quads[1] = LUMA_LR_gather(vec2((fp + vec2(2.0, 0.0)) * HOOKED_pt), 0);
+    luma_quads[2] = LUMA_LR_gather(vec2((fp + vec2(0.0, 2.0)) * HOOKED_pt), 0);
+    luma_quads[3] = LUMA_LR_gather(vec2((fp + vec2(2.0, 2.0)) * HOOKED_pt), 0);
 
     float luma_pixels[12];
     luma_pixels[0]  = luma_quads[0].z;
@@ -133,18 +195,18 @@ vec4 hook() {
     chroma_pixels[11] = HOOKED_tex(vec2((fp + vec2( 1.5, 2.5)) * HOOKED_pt)).xy;
 
     float luma_pixels[12];
-    luma_pixels[0]  = LUMA_LOWRES_tex(vec2((fp + vec2(0.5, -0.5)) * HOOKED_pt)).x;
-    luma_pixels[1]  = LUMA_LOWRES_tex(vec2((fp + vec2(1.5, -0.5)) * HOOKED_pt)).x;
-    luma_pixels[2]  = LUMA_LOWRES_tex(vec2((fp + vec2(-0.5, 0.5)) * HOOKED_pt)).x;
-    luma_pixels[3]  = LUMA_LOWRES_tex(vec2((fp + vec2( 0.5, 0.5)) * HOOKED_pt)).x;
-    luma_pixels[4]  = LUMA_LOWRES_tex(vec2((fp + vec2( 1.5, 0.5)) * HOOKED_pt)).x;
-    luma_pixels[5]  = LUMA_LOWRES_tex(vec2((fp + vec2( 2.5, 0.5)) * HOOKED_pt)).x;
-    luma_pixels[6]  = LUMA_LOWRES_tex(vec2((fp + vec2(-0.5, 1.5)) * HOOKED_pt)).x;
-    luma_pixels[7]  = LUMA_LOWRES_tex(vec2((fp + vec2( 0.5, 1.5)) * HOOKED_pt)).x;
-    luma_pixels[8]  = LUMA_LOWRES_tex(vec2((fp + vec2( 1.5, 1.5)) * HOOKED_pt)).x;
-    luma_pixels[9]  = LUMA_LOWRES_tex(vec2((fp + vec2( 2.5, 1.5)) * HOOKED_pt)).x;
-    luma_pixels[10] = LUMA_LOWRES_tex(vec2((fp + vec2( 0.5, 2.5)) * HOOKED_pt)).x;
-    luma_pixels[11] = LUMA_LOWRES_tex(vec2((fp + vec2( 1.5, 2.5)) * HOOKED_pt)).x;
+    luma_pixels[0]  = LUMA_LR_tex(vec2((fp + vec2(0.5, -0.5)) * HOOKED_pt)).x;
+    luma_pixels[1]  = LUMA_LR_tex(vec2((fp + vec2(1.5, -0.5)) * HOOKED_pt)).x;
+    luma_pixels[2]  = LUMA_LR_tex(vec2((fp + vec2(-0.5, 0.5)) * HOOKED_pt)).x;
+    luma_pixels[3]  = LUMA_LR_tex(vec2((fp + vec2( 0.5, 0.5)) * HOOKED_pt)).x;
+    luma_pixels[4]  = LUMA_LR_tex(vec2((fp + vec2( 1.5, 0.5)) * HOOKED_pt)).x;
+    luma_pixels[5]  = LUMA_LR_tex(vec2((fp + vec2( 2.5, 0.5)) * HOOKED_pt)).x;
+    luma_pixels[6]  = LUMA_LR_tex(vec2((fp + vec2(-0.5, 1.5)) * HOOKED_pt)).x;
+    luma_pixels[7]  = LUMA_LR_tex(vec2((fp + vec2( 0.5, 1.5)) * HOOKED_pt)).x;
+    luma_pixels[8]  = LUMA_LR_tex(vec2((fp + vec2( 1.5, 1.5)) * HOOKED_pt)).x;
+    luma_pixels[9]  = LUMA_LR_tex(vec2((fp + vec2( 2.5, 1.5)) * HOOKED_pt)).x;
+    luma_pixels[10] = LUMA_LR_tex(vec2((fp + vec2( 0.5, 2.5)) * HOOKED_pt)).x;
+    luma_pixels[11] = LUMA_LR_tex(vec2((fp + vec2( 1.5, 2.5)) * HOOKED_pt)).x;
 #endif
 
     float w[12];
